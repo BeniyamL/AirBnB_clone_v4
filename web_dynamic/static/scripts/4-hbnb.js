@@ -1,60 +1,75 @@
 $('document').ready(function () {
-  const amn = {};
-  $('input[type="checkbox"]').change(function () {
-    if ($(this).is(':checked')) {
-      amn[$(this).attr('data-id')] = $(this).attr('data-name');
-    } else {
-      delete amn[$(this).attr('data-id')];
-    }
-    $('div.amenities h4').text(Object.values(amn).join(', '));
-  });
+    $.get(api + ':5001:/api/v1/status/', function (response) {
+	if (response.status === 'OK') {
+	    $('DIV#api_status').addClass('available');
+	} else {
+	    $('DIV#api_status').removeClass('available');
+	}
+    });
 
+    $.ajax({
+	url: http://0.0.0.0:5001/api/v1/places_search/',
+	type: 'POST',
+	data: '{}',
+	contentType: 'application/json',
+	dataType: 'json',
+	success: appendPlaces
+	});
 
-  const $url = 'http://0.0.0.0:5001/api/v1/status/';
-  $.get($url, function (data) {
-    if (data.status === 'OK') {
-      $('div#api_status').addClass('available');
-    } else {
-      $('div#api_status').removeClass('available');
-    }
-  });
+    let amenities = {};
+    $('INPUT[type="checkbox"]').change(function () {
+	if ($(this).is(':checked')) {
+	    amenities[$(this).attr('data-id')] = $(this).attr('data-name');
+	} else {
+	    delete amenities[$(this).attr('data-id')];
+	}
+	if (Object.values(amenities).length === 0) {
+	    $('.amenities H4').text(Object.values(amenities).join(', '));
+	}
+    });
 
-  $.ajax({
-    url: 'http://0.0.0.0:5001/api/v1/places_search/',
-    data: '{}',
-    type: 'POST',
-    contentType: 'application/json',
-    dataType: 'json',
-    success: fillplaces
-  });
     $('BUTTON').click(function () {
 	$.ajax({
-	    url: api + ':5001/api/v1/places_search/',
+	    url: 'https://0.0.0.0:5001/api/v1/places_search/',
 	    type: 'POST',
-	    data: JSON.stringify({ 'amenities': Object.keys(amn) }),
+	    data: JSON.stringify({ 'amenities': Object.keys(amenities) }),
 	    contentType: 'application/json',
 	    dataType: 'json',
-	    success: fillplaces
+	    success: appendPlaces
 	});
     });
 });
 
-function fillplaces (data) {
-  $('section.places').empty();
-  $('section.places').append(data.map(place => {
-    return `<article>
-          <div class="title_box">
-            <h2> ${place.name}</h2>
-            <div class="price_by_night">$${place.price_by_night}</div>
-          </div>
-          <div class="information">
-            <div class="max_guest"> ${place.max_guest} Guests </div>
-            <div class="number_rooms">${place.number_rooms} Bedrooms</div>
-            <div class="number_bathrooms">${place.number_bathrooms} Bathrooms</div>
-          </div>
-          <div class="description">
-            ${place.description}
-          </div>
-        </article>`;
-  }));
+function appendPlaces (data) {
+    $('SECTION.places').empty();
+    $('SECTION.places').append(data.map(place => {
+	return `<ARTICLE>
+	    <DIV class="title">
+	     <H2>${place.name}</H2>
+	    <DIV class="price_by_night">
+	    ${place.price_by_night}
+	</DIV>
+	    </DIV>
+	    <DIV class="information">
+	    <DIV class="max_guest">
+	    <I class="fa fa-users fa-3x" aria-hidden="true"></I>
+	    </BR>
+	    ${place.max_guest} Guests
+	</DIV>
+	    <DIV class="number_rooms">
+	    <I class="fa fa-bed fa-3x" aria-hidden="true"></I>
+	    </BR>
+	    ${place.number_rooms} Bedrooms
+	</DIV>
+	    <DIV class="number_bathrooms">
+	    <I class="fa fa-bath fa-3x" aria-hidden="true"></I>
+	    </BR>
+	    ${place.number_bathrooms} Bathrooms
+	</DIV>
+	    </DIV>
+	    <DIV class="description">
+	    ${place.description}
+	</DIV>
+	    </ARTICLE>`;
+    }));
 }
